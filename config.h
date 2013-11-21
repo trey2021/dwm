@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
 /* appearance */
-static const char font[]            = "-*-dejavu sans mono-*-*-*-*-10-*-*-*-*-*-*-*";
+static const char font[]            = "-*-dejavu sans-*-*-*-*-10-*-*-*-*-*-*-*";
 static const char normbordercolor[] = "#444444";
 static const char normbgcolor[]     = "#222222";
 static const char normfgcolor[]     = "#bbbbbb";
@@ -33,7 +33,7 @@ static const Bool resizehints = True; /* True means respect size hints in tiled 
 
 static const Layout layouts[] = {
 	/* symbol     arrange function */
-	{ "[]=",      tile },    /* first entry is default */
+	{ "[T]",      tile },    /* first entry is default */
 	{ "[F]",      NULL },    /* no layout function means floating behavior */
 	{ "[M]",      monocle },
 };
@@ -52,7 +52,7 @@ static const Layout layouts[] = {
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", font, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor, NULL };
-static const char *termcmd[]  = { "st -e tmux", NULL };
+static const char *termcmd[]  = { "tmux", "new-window", NULL };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */

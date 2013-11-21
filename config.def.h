@@ -14,7 +14,7 @@ static const Bool showbar           = True;     /* False means no bar */
 static const Bool topbar            = True;     /* False means bottom bar */
 
 /* tagging */
-static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+static const char *tags[] = { "Work", "Code", "3", "4", "5", "6", "7", "8", "Browser" };
 
 static const Rule rules[] = {
 	/* xprop(1):
@@ -23,7 +23,7 @@ static const Rule rules[] = {
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
 	{ "Gimp",     NULL,       NULL,       0,            True,        -1 },
-	{ "Firefox",  NULL,       NULL,       1 << 8,       False,       -1 },
+	{ "Chromium",  NULL,       NULL,       1 << 8,       False,       -1 },
 };
 
 /* layout(s) */
@@ -34,7 +34,7 @@ static const Bool resizehints = True; /* True means respect size hints in tiled 
 static const Layout layouts[] = {
 	/* symbol     arrange function */
 	{ "[]=",      tile },    /* first entry is default */
-	{ "><>",      NULL },    /* no layout function means floating behavior */
+	{ "[F]",      NULL },    /* no layout function means floating behavior */
 	{ "[M]",      monocle },
 };
 
@@ -52,7 +52,7 @@ static const Layout layouts[] = {
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", font, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor, NULL };
-static const char *termcmd[]  = { "st", NULL };
+static const char *termcmd[]  = { "xterm", NULL };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
