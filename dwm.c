@@ -42,103 +42,7 @@
 
 #include "drw.h"
 #include "util.h"
-
-/* macros */
-#define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
-#define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
-#define INTERSECT(x,y,w,h,m)    (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
-                               * MAX(0, MIN((y)+(h),(m)->wy+(m)->wh) - MAX((y),(m)->wy)))
-#define ISVISIBLE(C)            ((C->tags & C->mon->tagset[C->mon->seltags]))
-#define LENGTH(X)               (sizeof X / sizeof X[0])
-#define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
-#define WIDTH(X)                ((X)->w + 2 * (X)->bw)
-#define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
-#define TAGMASK                 ((1 << LENGTH(tags)) - 1)
-#define TEXTW(X)                (drw_font_getexts_width(drw->font, X, strlen(X)) + drw->font->h)
-
-/* enums */
-enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
-enum { SchemeNorm, SchemeSel, SchemeLast }; /* color schemes */
-enum { NetSupported, NetWMName, NetWMState,
-       NetWMFullscreen, NetActiveWindow, NetWMWindowType,
-       NetWMWindowTypeDialog, NetClientList, NetLast }; /* EWMH atoms */
-enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
-enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
-       ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
-
-typedef union {
-	int i;
-	unsigned int ui;
-	float f;
-	const void *v;
-} Arg;
-
-typedef struct {
-	unsigned int click;
-	unsigned int mask;
-	unsigned int button;
-	void (*func)(const Arg *arg);
-	const Arg arg;
-} Button;
-
-typedef struct Monitor Monitor;
-typedef struct Client Client;
-struct Client {
-	char name[256];
-	float mina, maxa;
-	int x, y, w, h;
-	int oldx, oldy, oldw, oldh;
-	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
-	int bw, oldbw;
-	unsigned int tags;
-	Bool isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
-	Client *next;
-	Client *snext;
-	Monitor *mon;
-	Window win;
-};
-
-typedef struct {
-	unsigned int mod;
-	KeySym keysym;
-	void (*func)(const Arg *);
-	const Arg arg;
-} Key;
-
-typedef struct {
-	const char *symbol;
-	void (*arrange)(Monitor *);
-} Layout;
-
-struct Monitor {
-	char ltsymbol[16];
-	float mfact;
-	int nmaster;
-	int num;
-	int by;               /* bar geometry */
-	int mx, my, mw, mh;   /* screen size */
-	int wx, wy, ww, wh;   /* window area  */
-	unsigned int seltags;
-	unsigned int sellt;
-	unsigned int tagset[2];
-	Bool showbar;
-	Bool topbar;
-	Client *clients;
-	Client *sel;
-	Client *stack;
-	Monitor *next;
-	Window barwin;
-	const Layout *lt[2];
-};
-
-typedef struct {
-	const char *class;
-	const char *instance;
-	const char *title;
-	unsigned int tags;
-	Bool isfloating;
-	int monitor;
-} Rule;
+#include "dwm.h"
 
 /* function declarations */
 static void applyrules(Client *c);
@@ -232,6 +136,9 @@ static int xerror(Display *dpy, XErrorEvent *ee);
 static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void zoom(const Arg *arg);
+
+static void spiral(Monitor *mon);
+static void dwindle(Monitor *mon);
 
 /* variables */
 static const char broken[] = "broken";
@@ -2043,8 +1950,89 @@ zoom(const Arg *arg) {
 	pop(c);
 }
 
-int
-main(int argc, char *argv[]) {
+void fibonacci(Monitor *mon, int s) 
+{
+	unsigned int i, n, nx, ny, nw, nh;
+	Client *c;
+
+	for(n = 0, c = nexttiled(mon->clients); c; c = nexttiled(c->next), n++)
+            ;
+	if(n == 0)
+	    return;
+	
+	nx = mon->wx;
+	ny = 0;
+	nw = mon->ww;
+	nh = mon->wh;
+	
+	for (i = 0, c = nexttiled(mon->clients); c; c = nexttiled(c->next)) 
+        {
+	    if ((i % 2 && nh / 2 > 2 * c->bw)
+		   || (!(i % 2) && nw / 2 > 2 * c->bw)) 
+            {
+	        if(i < n - 1) 
+                {
+		    if (i % 2)
+                    {
+		        nh /= 2;
+                    }
+                    else
+                    {
+			nw /= 2;
+                    }
+
+                    if ((i % 4) == 2 && !s)
+                    {
+			nx += nw;
+                    }
+                    else if ((i % 4) == 3 && !s)
+                    {
+			ny += nh;
+                    }
+		}
+		if((i % 4) == 0) 
+                {
+                    ny += s ? nh : -nh;
+		}
+		else if((i % 4) == 1)
+                {
+		    nx += nw;
+                }
+                else if((i % 4) == 2)
+                {
+		    ny += nh;
+                }
+                else if((i % 4) == 3) 
+                {
+                    nx += s ? nw : -nw;
+                }
+		if(i == 0)
+		{
+		    if(n != 1)
+                    {
+			nw = mon->ww * mon->mfact;
+                    }
+                    ny = mon->wy;
+		}
+		else if(i == 1)
+                {
+		    nw = mon->ww - nw;
+                }
+                i++;
+            }
+	    resize(c, nx, ny, nw - 2 * c->bw, nh - 2 * c->bw, False);
+	}
+}
+
+void dwindle(Monitor *mon) {
+	fibonacci(mon, 1);
+}
+
+void spiral(Monitor *mon) {
+	fibonacci(mon, 0);
+}
+
+int main(int argc, char *argv[]) {
 	if(argc == 2 && !strcmp("-v", argv[1]))
 		die("dwm-"VERSION", © 2006-2012 dwm engineers, see LICENSE for details\n");
 	else if(argc != 1)
