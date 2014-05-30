@@ -91,12 +91,13 @@ static Client *nexttiled(Client *c);
 static void pop(Client *);
 static void propertynotify(XEvent *e);
 static void quit(const Arg *arg);
+static void restart(const Arg *arg);
 static Monitor *recttomon(int x, int y, int w, int h);
 static void resize(Client *c, int x, int y, int w, int h, Bool interact);
 static void resizeclient(Client *c, int x, int y, int w, int h);
 static void resizemouse(const Arg *arg);
 static void restack(Monitor *m);
-static void run(void);
+static int run(void);
 static void scan(void);
 static Bool sendevent(Client *c, Atom proto);
 static void sendmon(Client *c, Monitor *m);
@@ -165,7 +166,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[UnmapNotify] = unmapnotify
 };
 static Atom wmatom[WMLast], netatom[NetLast];
-static Bool running = True;
+static int running = 2;
 static Cur *cursor[CurLast];
 static ClrScheme scheme[SchemeLast];
 static Display *dpy;
@@ -1133,7 +1134,12 @@ propertynotify(XEvent *e) {
 
 void
 quit(const Arg *arg) {
-	running = False;
+    running = EXIT_QUIT;
+}
+
+void restart(const Arg *arg)
+{
+    running = EXIT_RESTART;
 }
 
 Monitor *
@@ -1245,14 +1251,19 @@ restack(Monitor *m) {
 	while(XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 }
 
-void
-run(void) {
-	XEvent ev;
-	/* main event loop */
-	XSync(dpy, False);
-	while(running && !XNextEvent(dpy, &ev))
-		if(handler[ev.type])
-			handler[ev.type](&ev); /* call handler */
+int run(void)
+{
+    XEvent ev;
+    /* main event loop */
+    XSync(dpy, False);
+    while(running > 1  && !XNextEvent(dpy, &ev))
+    {
+        if(handler[ev.type])
+        {
+            handler[ev.type](&ev); /* call handler */
+        }
+    }
+    return running;
 }
 
 void
@@ -2033,6 +2044,7 @@ void spiral(Monitor *mon) {
 }
 
 int main(int argc, char *argv[]) {
+        int exitCode = EXIT_SUCCESS;
 	if(argc == 2 && !strcmp("-v", argv[1]))
 		die("dwm-"VERSION", © 2006-2012 dwm engineers, see LICENSE for details\n");
 	else if(argc != 1)
@@ -2044,8 +2056,8 @@ int main(int argc, char *argv[]) {
 	checkotherwm();
 	setup();
 	scan();
-	run();
+	exitCode = run();
 	cleanup();
 	XCloseDisplay(dpy);
-	return EXIT_SUCCESS;
+	return exitCode;
 }
