@@ -2035,29 +2035,45 @@ void fibonacci(Monitor *mon, int s)
 	}
 }
 
-void dwindle(Monitor *mon) {
+void dwindle(Monitor *mon) 
+{
 	fibonacci(mon, 1);
 }
 
-void spiral(Monitor *mon) {
+void spiral(Monitor *mon) 
+{
 	fibonacci(mon, 0);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) 
+{
         int exitCode = EXIT_SUCCESS;
-	if(argc == 2 && !strcmp("-v", argv[1]))
+
+	if(argc == 2 && 0 == strcmp("-v", argv[1]))
+        {
 		die("dwm-"VERSION", © 2006-2012 dwm engineers, see LICENSE for details\n");
+        }
 	else if(argc != 1)
+        {
 		die("usage: dwm [-v]\n");
+        }
+
 	if(!setlocale(LC_CTYPE, "") || !XSupportsLocale())
+        {
 		fputs("warning: no locale support\n", stderr);
+        }
+
 	if(!(dpy = XOpenDisplay(NULL)))
+        {
 		die("dwm: cannot open display\n");
+        }
+
 	checkotherwm();
 	setup();
 	scan();
 	exitCode = run();
 	cleanup();
 	XCloseDisplay(dpy);
+
 	return exitCode;
 }
