@@ -1,12 +1,18 @@
 /* See LICENSE file for copyright and license details. */
 
 /* appearance */
-static const char font[]            = "-*-dejavu sans-medium-r-normal-*-10-*-*-*-*-*-*-*";
+static const char font[]            = "-adobe-source code pro-*-r-normal-*-12-*-*-*-*-*-*-*";
+//static const char normbordercolor[] = "#444444";
+//static const char normbgcolor[]     = "#222222";
+//static const char normfgcolor[]     = "#bbbbbb";
+//static const char selbordercolor[]  = "#005577";
+//static const char selbgcolor[]      = "#005577";
+//static const char selfgcolor[]      = "#eeeeee";
 static const char normbordercolor[] = "#444444";
-static const char normbgcolor[]     = "#222222";
-static const char normfgcolor[]     = "#bbbbbb";
-static const char selbordercolor[]  = "#005577";
-static const char selbgcolor[]      = "#005577";
+static const char normbgcolor[]     = "#073642";
+static const char normfgcolor[]     = "#eee8d5";
+static const char selbordercolor[]  = "#365c66";
+static const char selbgcolor[]      = "#365c66";
 static const char selfgcolor[]      = "#eeeeee";
 static const unsigned int borderpx  = 1;        /* border pixel of windows */
 static const unsigned int snap      = 32;       /* snap pixel */
@@ -14,7 +20,8 @@ static const Bool showbar           = True;     /* False means no bar */
 static const Bool topbar            = False;     /* False means bottom bar */
 
 /* tagging */
-static const char *tags[] = { "Work", "Code", "3", "4", "5", "6", "7", "8", "Browser" };
+static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "Browser" };
+//static const char *tags[] = { "1", "2", "3", "4", "Browser" };
 
 static const Rule rules[] = {
 	/* xprop(1):
